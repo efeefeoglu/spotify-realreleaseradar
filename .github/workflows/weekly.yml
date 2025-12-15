@@ -2,7 +2,7 @@ name: Weekly Python job
 
 on:
   schedule:
-    - cron: "15 15 * * 1"   # Every Monday 03:00 UTC
+    - cron: "45 15 * * 1"   # Every Monday 03:00 UTC
   workflow_dispatch:       # Allows manual run from GitHub UI
 
 jobs:
