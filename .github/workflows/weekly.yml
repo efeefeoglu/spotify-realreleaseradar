@@ -2,7 +2,7 @@ name: Weekly Python job
 
 on:
   schedule:
-    - cron: "0 3 * * 1"   # Every Monday 03:00 UTC
+    - cron: "15 18 * * 1"   # Every Monday 03:00 UTC
   workflow_dispatch:       # Allows manual run from GitHub UI
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
@@ -25,4 +25,4 @@ jobs:
 
       - name: Run script
         run: |
-          python script.py
+          python main.py
