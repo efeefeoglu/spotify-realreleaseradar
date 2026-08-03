@@ -11,11 +11,6 @@ def required_env(name):
     return value
 
 
-spotify_client_id = required_env("SPOTIFY_CLIENT_ID")
-spotify_client_secret = required_env("SPOTIFY_CLIENT_SECRET")
-spotify_refresh_token = required_env("SPOTIFY_REFRESH_TOKEN")
-
-
 def main():
     refresh_token = renew_refresh_token(required_env("SPOTIFY_CLIENT_ID"),required_env("SPOTIFY_CLIENT_SECRET"),required_env("SPOTIFY_AUTHORIZATION_CODE"),required_env("SPOTIFY_REDIRECT_URI"))
 
