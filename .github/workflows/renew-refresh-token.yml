@@ -34,7 +34,7 @@ jobs:
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           SPOTIFY_AUTHORIZATION_CODE: ${{ secrets.SPOTIFY_AUTHORIZATION_CODE }}
-          SPOTIFY_REDIRECT_URI: ${{ vars.SPOTIFY_REDIRECT_URI }}
+          SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
         run: |
           missing=0
           for name in SPOTIFY_CLIENT_ID SPOTIFY_CLIENT_SECRET SPOTIFY_AUTHORIZATION_CODE SPOTIFY_REDIRECT_URI; do
@@ -51,7 +51,7 @@ jobs:
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
           SPOTIFY_AUTHORIZATION_CODE: ${{ secrets.SPOTIFY_AUTHORIZATION_CODE }}
-          SPOTIFY_REDIRECT_URI: ${{ vars.SPOTIFY_REDIRECT_URI }}
+          SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
         run: python renew_refresh_token.py
 
       - name: Replace repository refresh-token secret
