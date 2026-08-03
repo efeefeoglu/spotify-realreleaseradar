@@ -90,6 +90,39 @@ Configure these repository settings before running it:
 - Add the playlist IDs and optional excluded-artist list as GitHub Actions
   **variables**, using the same names shown above.
 
+### Replace a revoked refresh token
+
+A revoked refresh token cannot be used to obtain another refresh token. First,
+authorize the Spotify application again with an authorization URL containing
+the required scopes and `response_type=code`. The redirect URI must exactly
+match one registered in the Spotify application dashboard. Copy the `code`
+query parameter from the redirect URL promptly; it is short-lived and can only
+be used once.
+
+To safely exchange that code and replace the repository secret:
+
+1. Set the repository variable `SPOTIFY_REDIRECT_URI` to the same redirect URI
+   used in the authorization request.
+2. Add `GH_SECRETS_TOKEN`, using a fine-grained personal access token that can
+   write Actions secrets for this repository. The workflow's built-in
+   `GITHUB_TOKEN` cannot manage repository secrets.
+3. Create or replace the repository secret `SPOTIFY_AUTHORIZATION_CODE` with
+   the one-time code. Do not put the code in a workflow-dispatch input.
+4. Run **Renew Spotify refresh token** from the Actions tab.
+5. Delete the now-used `SPOTIFY_AUTHORIZATION_CODE` secret after the workflow
+   succeeds.
+
+The workflow calls `renew_refresh_token.py`, masks the returned credential, and
+uses GitHub CLI to replace `SPOTIFY_REFRESH_TOKEN`. The next weekly run then
+uses the new token. Keep `GH_SECRETS_TOKEN` narrowly scoped. Alternatively, run
+the helper locally and update `SPOTIFY_REFRESH_TOKEN` manually through the
+repository settings.
+
+The authorization request must include the scopes needed by `main.py`:
+`user-read-recently-played`, `user-follow-read`, `user-follow-modify`,
+`playlist-read-private`, `playlist-modify-private`, and
+`playlist-modify-public`.
+
 ## Operational notes
 
 - Only the first artist credited on tracks in Ultimate and recently played
