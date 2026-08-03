@@ -61,6 +61,41 @@ and reading and modifying the configured playlists.
 Keep `.env`, client secrets, and refresh tokens out of version control. The
 included example contains names only and is safe to copy as a template.
 
+## Get a new refresh token
+
+`get_refresh_token.py` is a separate local helper that runs Spotify's OAuth 2.0
+authorization-code flow. It requests only the scopes used by `main.py`, waits
+for the browser redirect on the loopback interface, and prints the resulting
+refresh token. It does not write the token to disk.
+
+1. Open your application in the Spotify Developer Dashboard and add this exact
+   redirect URI:
+
+   ```text
+   http://127.0.0.1:8888/callback
+   ```
+
+2. From a terminal on a computer with a browser, install the dependency and
+   provide the application's credentials:
+
+   ```bash
+   python -m pip install requests
+   export SPOTIFY_CLIENT_ID='your-client-id'
+   export SPOTIFY_CLIENT_SECRET='your-client-secret'
+   python get_refresh_token.py
+   ```
+
+3. Approve the requested access in the browser. Copy the printed
+   `SPOTIFY_REFRESH_TOKEN` value into `.env` and update the corresponding
+   GitHub Actions secret if the weekly workflow uses it.
+
+Use `--no-browser` to copy the displayed URL into a browser manually. Use
+`--port PORT` if port 8888 is unavailable, and register the matching
+`http://127.0.0.1:PORT/callback` URI in the Spotify app first. The helper waits
+five minutes by default; `--timeout SECONDS` changes that limit. Run this only
+on a trusted computer because the client secret and resulting refresh token
+grant access to the Spotify account.
+
 ## Run locally
 
 Python 3.10 or later is recommended.
