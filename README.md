@@ -121,9 +121,16 @@ and can also be started manually with **Run workflow**.
 Configure these repository settings before running it:
 
 - Add `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and
-  `SPOTIFY_REFRESH_TOKEN` as GitHub Actions **secrets**.
+  `SPOTIFY_REFRESH_TOKEN` under **Settings → Secrets and variables → Actions →
+  Repository secrets**. The workflow passes these secrets directly to the
+  `Run script` step; it never prints their values.
 - Add the playlist IDs and optional excluded-artist list as GitHub Actions
   **variables**, using the same names shown above.
+
+Secrets created for a GitHub **Environment** are not repository secrets and are
+only available to jobs that reference that environment. This workflow does not
+select an environment, so use repository secrets unless you also add the
+appropriate `environment:` setting to the `run` job.
 
 ## Operational notes
 
