@@ -5,24 +5,8 @@ import os
 from spotify_auth import renew_refresh_token
 
 
-def required_env(name):
-    value = os.getenv(name)
-    if not value:
-        raise RuntimeError(
-            f"Missing required environment variable: {name}. "
-            "When running in GitHub Actions, make sure the secret or variable "
-            "exists in the GitHub environment selected for this workflow run."
-        )
-    return value
-
-
 def main():
-    refresh_token = renew_refresh_token(
-        required_env("SPOTIFY_CLIENT_ID"),
-        required_env("SPOTIFY_CLIENT_SECRET"),
-        required_env("SPOTIFY_AUTHORIZATION_CODE"),
-        required_env("SPOTIFY_REDIRECT_URI"),
-    )
+    refresh_token = renew_refresh_token(secrets.SPOTIFY_CLIENT_ID,secrets.SPOTIFY_CLIENT_SECRET,secrets.SPOTIFY_AUTHORIZATION_CODE,secrets.SPOTIFY_REDIRECT_URI)
 
     # Mask the credential before making it available to later workflow steps.
     print(f"::add-mask::{refresh_token}")
