@@ -119,6 +119,13 @@ To safely exchange that code and replace the repository secret:
 5. Delete the now-used `SPOTIFY_AUTHORIZATION_CODE` secret after the workflow
    succeeds.
 
+The `${{ secrets.NAME }}` syntax is a GitHub Actions expression and is not
+available inside Python. The workflow therefore resolves each secret and
+passes it to the helper as an environment variable. If the validation step
+reports an empty setting, add it to the environment selected when dispatching
+the workflow (or add it as a repository setting); changing the Python lookup
+cannot make an unavailable secret visible.
+
 The workflow calls `renew_refresh_token.py`, masks the returned credential, and
 uses GitHub CLI to replace `SPOTIFY_REFRESH_TOKEN`. The next weekly run then
 uses the new token. Keep `GH_SECRETS_TOKEN` narrowly scoped. Alternatively, run

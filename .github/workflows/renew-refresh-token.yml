@@ -26,6 +26,25 @@ jobs:
         with:
           python-version: "3.10"
 
+      # GitHub's `secrets` context is available only while Actions evaluates
+      # this workflow. Programs cannot access `secrets.SPOTIFY_CLIENT_ID`
+      # directly, so each value must be passed to Python (here, via env).
+      - name: Validate Spotify settings
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_AUTHORIZATION_CODE: ${{ secrets.SPOTIFY_AUTHORIZATION_CODE }}
+          SPOTIFY_REDIRECT_URI: ${{ vars.SPOTIFY_REDIRECT_URI }}
+        run: |
+          missing=0
+          for name in SPOTIFY_CLIENT_ID SPOTIFY_CLIENT_SECRET SPOTIFY_AUTHORIZATION_CODE SPOTIFY_REDIRECT_URI; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured in the selected GitHub environment"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
       - name: Exchange authorization code
         id: spotify
         env:
