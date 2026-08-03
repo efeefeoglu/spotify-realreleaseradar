@@ -8,7 +8,11 @@ from spotify_auth import renew_refresh_token
 def required_env(name):
     value = os.getenv(name)
     if not value:
-        raise RuntimeError(f"Missing required environment variable: {name}")
+        raise RuntimeError(
+            f"Missing required environment variable: {name}. "
+            "When running in GitHub Actions, make sure the secret or variable "
+            "exists in the GitHub environment selected for this workflow run."
+        )
     return value
 
 
