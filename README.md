@@ -101,14 +101,21 @@ be used once.
 
 To safely exchange that code and replace the repository secret:
 
-1. Set the repository variable `SPOTIFY_REDIRECT_URI` to the same redirect URI
-   used in the authorization request.
-2. Add `GH_SECRETS_TOKEN`, using a fine-grained personal access token that can
-   write Actions secrets for this repository. The workflow's built-in
-   `GITHUB_TOKEN` cannot manage repository secrets.
-3. Create or replace the repository secret `SPOTIFY_AUTHORIZATION_CODE` with
-   the one-time code. Do not put the code in a workflow-dispatch input.
-4. Run **Renew Spotify refresh token** from the Actions tab.
+1. Put `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`,
+   `SPOTIFY_AUTHORIZATION_CODE`, and `GH_SECRETS_TOKEN` in the same GitHub
+   environment. Set that environment's `SPOTIFY_REDIRECT_URI` variable to the
+   exact redirect URI used in the authorization request. Repository-level
+   secrets and variables also work, but do not create environment and
+   repository settings with conflicting values.
+2. Give `GH_SECRETS_TOKEN` permission to write Actions secrets for this
+   repository. The workflow's built-in `GITHUB_TOKEN` cannot manage repository
+   secrets.
+3. Do not put the one-time authorization code in a workflow-dispatch text
+   input. Store it as `SPOTIFY_AUTHORIZATION_CODE` instead.
+4. Run **Renew Spotify refresh token** from the Actions tab and select the
+   GitHub environment containing the settings. GitHub does not expose an
+   environment secret unless the job declares that environment; an empty
+   secret expression otherwise becomes an empty environment variable.
 5. Delete the now-used `SPOTIFY_AUTHORIZATION_CODE` secret after the workflow
    succeeds.
 
@@ -117,6 +124,13 @@ uses GitHub CLI to replace `SPOTIFY_REFRESH_TOKEN`. The next weekly run then
 uses the new token. Keep `GH_SECRETS_TOKEN` narrowly scoped. Alternatively, run
 the helper locally and update `SPOTIFY_REFRESH_TOKEN` manually through the
 repository settings.
+
+GitHub Actions can exchange an authorization code for a refresh token, but it
+cannot perform Spotify's interactive user-consent step for you. Obtain the
+one-time authorization code in a browser first. Also note that this workflow
+replaces a missing or revoked refresh token; routine runs should reuse the
+existing refresh token to request short-lived access tokens rather than create
+a new refresh token every week.
 
 The authorization request must include the scopes needed by `main.py`:
 `user-read-recently-played`, `user-follow-read`, `user-follow-modify`,
