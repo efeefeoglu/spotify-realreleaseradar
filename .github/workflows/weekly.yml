@@ -8,16 +8,6 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    env:
-      SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-      SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-      SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
-      SPOTIFY_ADEU_PLAYLIST_ID: ${{ vars.SPOTIFY_ADEU_PLAYLIST_ID }}
-      SPOTIFY_YENI_PLAYLIST_ID: ${{ vars.SPOTIFY_YENI_PLAYLIST_ID }}
-      SPOTIFY_RELEASE_RADAR_PLAYLIST_ID: ${{ vars.SPOTIFY_RELEASE_RADAR_PLAYLIST_ID }}
-      SPOTIFY_MASNUEVOS_PLAYLIST_ID: ${{ vars.SPOTIFY_MASNUEVOS_PLAYLIST_ID }}
-      SPOTIFY_ULTIMATE_PLAYLIST_ID: ${{ vars.SPOTIFY_ULTIMATE_PLAYLIST_ID }}
-      SPOTIFY_EXCLUDED_ARTIST_IDS: ${{ vars.SPOTIFY_EXCLUDED_ARTIST_IDS }}
 
     steps:
       - name: Checkout repo
@@ -34,5 +24,31 @@ jobs:
           python -m pip install requests
 
       - name: Run script
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+          SPOTIFY_ADEU_PLAYLIST_ID: ${{ vars.SPOTIFY_ADEU_PLAYLIST_ID }}
+          SPOTIFY_YENI_PLAYLIST_ID: ${{ vars.SPOTIFY_YENI_PLAYLIST_ID }}
+          SPOTIFY_RELEASE_RADAR_PLAYLIST_ID: ${{ vars.SPOTIFY_RELEASE_RADAR_PLAYLIST_ID }}
+          SPOTIFY_MASNUEVOS_PLAYLIST_ID: ${{ vars.SPOTIFY_MASNUEVOS_PLAYLIST_ID }}
+          SPOTIFY_ULTIMATE_PLAYLIST_ID: ${{ vars.SPOTIFY_ULTIMATE_PLAYLIST_ID }}
+          SPOTIFY_EXCLUDED_ARTIST_IDS: ${{ vars.SPOTIFY_EXCLUDED_ARTIST_IDS }}
         run: |
+          required=(
+            SPOTIFY_CLIENT_ID
+            SPOTIFY_CLIENT_SECRET
+            SPOTIFY_REFRESH_TOKEN
+            SPOTIFY_ADEU_PLAYLIST_ID
+            SPOTIFY_YENI_PLAYLIST_ID
+            SPOTIFY_RELEASE_RADAR_PLAYLIST_ID
+            SPOTIFY_MASNUEVOS_PLAYLIST_ID
+            SPOTIFY_ULTIMATE_PLAYLIST_ID
+          )
+          for name in "${required[@]}"; do
+            if [[ -z "${!name}" ]]; then
+              echo "::error::${name} is unavailable to this workflow. Check its Actions secret/variable name and scope."
+              exit 1
+            fi
+          done
           python main.py
