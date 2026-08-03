@@ -85,10 +85,8 @@ and can also be started manually with **Run workflow**.
 
 Configure these repository settings before running it:
 
-- Add `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, and
-  `SPOTIFY_REFRESH_TOKEN` as GitHub Actions **secrets**.
-- Add the playlist IDs and optional excluded-artist list as GitHub Actions
-  **variables**, using the same names shown above.
+- Add every setting shown above as a GitHub Actions **secret**, using the same
+  names. The optional `SPOTIFY_EXCLUDED_ARTIST_IDS` secret may be omitted.
 
 ### Replace a revoked refresh token
 
@@ -103,10 +101,8 @@ To safely exchange that code and replace the repository secret:
 
 1. Put `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`,
    `SPOTIFY_AUTHORIZATION_CODE`, and `GH_SECRETS_TOKEN` in the same GitHub
-   environment. Set that environment's `SPOTIFY_REDIRECT_URI` variable to the
-   exact redirect URI used in the authorization request. Repository-level
-   secrets and variables also work, but do not create environment and
-   repository settings with conflicting values.
+   environment. Also set `SPOTIFY_REDIRECT_URI` as a secret in that environment
+   with the exact redirect URI used in the authorization request.
 2. Give `GH_SECRETS_TOKEN` permission to write Actions secrets for this
    repository. The workflow's built-in `GITHUB_TOKEN` cannot manage repository
    secrets.
