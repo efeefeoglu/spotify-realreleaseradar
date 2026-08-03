@@ -1,8 +1,28 @@
+import os
 import requests, json, random
 from datetime import datetime
 from requests.auth import HTTPBasicAuth
 
-exclude = ["0LyfQWJT6nXafLPZqxe9Of"]
+def required_env(name):
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
+spotify_client_id = required_env("SPOTIFY_CLIENT_ID")
+spotify_client_secret = required_env("SPOTIFY_CLIENT_SECRET")
+spotify_refresh_token = required_env("SPOTIFY_REFRESH_TOKEN")
+adeu_playlist_id = required_env("SPOTIFY_ADEU_PLAYLIST_ID")
+yeni_playlist_id = required_env("SPOTIFY_YENI_PLAYLIST_ID")
+release_radar_playlist_id = required_env("SPOTIFY_RELEASE_RADAR_PLAYLIST_ID")
+masnuevos_playlist_id = required_env("SPOTIFY_MASNUEVOS_PLAYLIST_ID")
+ultimate_playlist_id = required_env("SPOTIFY_ULTIMATE_PLAYLIST_ID")
+exclude = [
+    artist_id.strip()
+    for artist_id in os.getenv("SPOTIFY_EXCLUDED_ARTIST_IDS", "").split(",")
+    if artist_id.strip()
+]
 
 from collections import Counter
 
@@ -12,22 +32,22 @@ def removeElements(lst,limit):
 
 data = {
     'grant_type': 'refresh_token',
-    'refresh_token': 'AQA6aRYnezOEgk4QdI-YLJRo6hyQuy4fthMZOvw8Yj2DhH-kWO8AKh3pKsvw0hlwzAomO4bXfU6zxepeRIbrakwmd7hB6EvZRuElKEBdEB3xlcM68x1CDTSJmCTKH-inwRs'
+    'refresh_token': spotify_refresh_token
 }
-gettoken = requests.post('https://accounts.spotify.com/api/token', data=data, auth=HTTPBasicAuth('9076f6e1d48f4693b426d0e4554ae3a6', '0dd2879dc1634c28858e00f4f37182aa'))
-print("-------------------------------------------------------")
-print("-------------------------------------------------------")
-print("-------------------------------------------------------")
-print(gettoken.text)
-print("-------------------------------------------------------")
+gettoken = requests.post(
+    'https://accounts.spotify.com/api/token',
+    data=data,
+    auth=HTTPBasicAuth(spotify_client_id, spotify_client_secret),
+)
+gettoken.raise_for_status()
 
-token = json.loads(gettoken.text)["access_token"]
+token = gettoken.json()["access_token"]
 headers = {"Authorization": f"Bearer {token}"}
 
 
 
 print("#Remove adeu")
-playlist = requests.get(f"https://api.spotify.com/v1/playlists/3JipB668cYf4wNMXCqFORj/tracks", headers=headers)
+playlist = requests.get(f"https://api.spotify.com/v1/playlists/{adeu_playlist_id}/tracks", headers=headers)
 pl = playlist.json()
 cc = pl["items"]
 remove_data = {"tracks": []}
@@ -40,34 +60,34 @@ for c in cc:
     for at in album_tracks:
         remove_data["tracks"].append({"uri": str(at["uri"])})
 if clean_data["tracks"]:
-    clean = requests.delete("https://api.spotify.com/v1/playlists/3JipB668cYf4wNMXCqFORj/tracks", headers=headers, json=clean_data)
+    clean = requests.delete(f"https://api.spotify.com/v1/playlists/{adeu_playlist_id}/tracks", headers=headers, json=clean_data)
     print(clean.text)
-    remove = requests.delete("https://api.spotify.com/v1/playlists/6atuuQCz16M44yALH3inPW/tracks", headers=headers, json=remove_data)
+    remove = requests.delete(f"https://api.spotify.com/v1/playlists/{yeni_playlist_id}/tracks", headers=headers, json=remove_data)
     print(remove.text)
 
 
 
 print("#Clean Real Release Radar")
-playlist = requests.get(f"https://api.spotify.com/v1/playlists/6DrQLRiTFXuuMrGrrU3Yag/tracks", headers=headers)
+playlist = requests.get(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers)
 pl = json.loads(playlist.text)
 cc = pl["items"]
 clean_data = {"tracks": []}
 for c in cc:
     clean_data["tracks"].append({"uri": str(c["track"]["uri"])})
 
-clean = requests.delete("https://api.spotify.com/v1/playlists/6DrQLRiTFXuuMrGrrU3Yag/tracks", headers=headers, json=clean_data)
+clean = requests.delete(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=clean_data)
 print(clean.text)
 
 
 print("#Clean masnuevos")
-playlist = requests.get(f"https://api.spotify.com/v1/playlists/0xa959gzBBzf3ppnlskFdl/tracks", headers=headers)
+playlist = requests.get(f"https://api.spotify.com/v1/playlists/{masnuevos_playlist_id}/tracks", headers=headers)
 pl = json.loads(playlist.text)
 cc = pl["items"]
 clean_data = {"tracks": []}
 for c in cc:
     clean_data["tracks"].append({"uri": str(c["track"]["uri"])})
 
-clean = requests.delete("https://api.spotify.com/v1/playlists/0xa959gzBBzf3ppnlskFdl/tracks", headers=headers, json=clean_data)
+clean = requests.delete(f"https://api.spotify.com/v1/playlists/{masnuevos_playlist_id}/tracks", headers=headers, json=clean_data)
 print(clean.text)
 
 
@@ -92,7 +112,7 @@ total = 5000
 i = 0
 artists = []
 while i<total:
-    playlist = requests.get(f"https://api.spotify.com/v1/playlists/6J36Cfyn8bnyzklQj2IJaA/tracks?offset={i}", headers=headers)
+    playlist = requests.get(f"https://api.spotify.com/v1/playlists/{ultimate_playlist_id}/tracks?offset={i}", headers=headers)
     pl = json.loads(playlist.text)
     pp = pl["items"]
 
@@ -150,7 +170,7 @@ for a in artists:
 
 print("#Update Real Release Radar Tracks")
 json = {"uris":uris}
-updatelist =requests.post(f"https://api.spotify.com/v1/playlists/6DrQLRiTFXuuMrGrrU3Yag/tracks", headers=headers, json=json)
+updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=json)
 print(updatelist.text)
 
 
@@ -180,7 +200,7 @@ for a in candidates:
             uris.append(trk["uri"])
 if len(uris)>0:
     json = {"uris":uris}
-    updatelist =requests.post(f"https://api.spotify.com/v1/playlists/6DrQLRiTFXuuMrGrrU3Yag/tracks", headers=headers, json=json)
+    updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=json)
     print(updatelist.text)
 
 
@@ -193,7 +213,7 @@ i = 0
 tracks = []
 while i<total:
     try:
-        yeni = requests.get(f"https://api.spotify.com/v1/playlists/6atuuQCz16M44yALH3inPW/tracks?offset={i}", headers=headers)
+        yeni = requests.get(f"https://api.spotify.com/v1/playlists/{yeni_playlist_id}/tracks?offset={i}", headers=headers)
         pl = yeni.json()
         pp = pl["items"]
         for p in pp:
@@ -209,5 +229,5 @@ randomTracks = random.sample(tracks, 25)
 print("#Update masnuevos Tracks")
 
 json = {"uris":randomTracks}
-updatelist =requests.post(f"https://api.spotify.com/v1/playlists/0xa959gzBBzf3ppnlskFdl/tracks", headers=headers, json=json)
+updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{masnuevos_playlist_id}/tracks", headers=headers, json=json)
 print(updatelist.text)
