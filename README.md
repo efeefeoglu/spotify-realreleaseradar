@@ -25,6 +25,8 @@ In one run, `main.py`:
 6. Adds up to two top tracks from related artists recommended by at least two
    source artists.
 7. Fills Mas Nuevos with 25 randomly selected tracks from Yeni.
+8. Writes every unique album-artist and album-name combination currently in
+   Yeni to `nuevos.json`.
 
 > [!WARNING]
 > The script changes playlists in place. Real Release Radar and Mas Nuevos are
@@ -117,6 +119,12 @@ playlists, there is no dry-run mode. Test with disposable playlists first.
 
 The workflow in `.github/workflows/weekly.yml` runs every Friday at 05:25 UTC
 and can also be started manually with **Run workflow**.
+
+After a successful run, the workflow commits and pushes `nuevos.json` when its
+contents have changed. Entries are deduplicated and sorted so the file only
+changes when the set of artist/album combinations in Yeni changes. The
+workflow's `contents: write` permission allows its `GITHUB_TOKEN` to publish
+that commit.
 
 Configure these repository settings before running it:
 
