@@ -2,8 +2,11 @@ name: Weekly Python job
 
 on:
   schedule:
-    - cron: "25 05 * * 5"   # Every Monday 03:00 UTC
+    - cron: "25 05 * * 5"   # Every Friday 05:25 UTC
   workflow_dispatch:       # Allows manual run from GitHub UI
+
+permissions:
+  contents: write
 
 jobs:
   run:
@@ -52,3 +55,15 @@ jobs:
             fi
           done
           python main.py
+
+      - name: Publish Yeni artist and album list
+        run: |
+          if git diff --quiet -- nuevos.json; then
+            echo "nuevos.json is already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add nuevos.json
+          git commit -m "Update nuevos.json"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

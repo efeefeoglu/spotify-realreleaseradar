@@ -169,8 +169,8 @@ for a in artists:
         pass
 
 print("#Update Real Release Radar Tracks")
-json = {"uris":uris}
-updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=json)
+payload = {"uris":uris}
+updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=payload)
 print(updatelist.text)
 
 
@@ -199,8 +199,8 @@ for a in candidates:
         for trk in al["tracks"][:2]:
             uris.append(trk["uri"])
 if len(uris)>0:
-    json = {"uris":uris}
-    updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=json)
+    payload = {"uris":uris}
+    updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{release_radar_playlist_id}/tracks", headers=headers, json=payload)
     print(updatelist.text)
 
 
@@ -211,23 +211,44 @@ print("#GET Artist from Yeni")
 total = 5000
 i = 0
 tracks = []
+nuevos = set()
 while i<total:
     try:
         yeni = requests.get(f"https://api.spotify.com/v1/playlists/{yeni_playlist_id}/tracks?offset={i}", headers=headers)
         pl = yeni.json()
         pp = pl["items"]
         for p in pp:
-            tracks.append(p["track"]["uri"])
+            track = p.get("track")
+            if not track:
+                continue
+            tracks.append(track["uri"])
+            album = track.get("album") or {}
+            album_name = album.get("name")
+            for artist in album.get("artists", []):
+                artist_name = artist.get("name")
+                if artist_name and album_name:
+                    nuevos.add((artist_name, album_name))
         total = pl["total"]
         i+=100
     except Exception as e:
         print(e)
         break
 print(tracks)
+with open("nuevos.json", "w", encoding="utf-8") as nuevos_file:
+    json.dump(
+        [
+            {"Artist": artist, "Album": album}
+            for artist, album in sorted(nuevos, key=lambda item: (item[0].casefold(), item[1].casefold()))
+        ],
+        nuevos_file,
+        ensure_ascii=False,
+        indent=2,
+    )
+    nuevos_file.write("\n")
 randomTracks = random.sample(tracks, 25)
 
 print("#Update masnuevos Tracks")
 
-json = {"uris":randomTracks}
-updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{masnuevos_playlist_id}/tracks", headers=headers, json=json)
+payload = {"uris":randomTracks}
+updatelist =requests.post(f"https://api.spotify.com/v1/playlists/{masnuevos_playlist_id}/tracks", headers=headers, json=payload)
 print(updatelist.text)
