@@ -45,7 +45,6 @@ token = gettoken.json()["access_token"]
 headers = {"Authorization": f"Bearer {token}"}
 
 
-
 print("#Remove adeu")
 playlist = requests.get(f"https://api.spotify.com/v1/playlists/{adeu_playlist_id}/tracks", headers=headers)
 pl = playlist.json()
